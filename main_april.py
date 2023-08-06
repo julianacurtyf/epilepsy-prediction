@@ -129,7 +129,7 @@ for j in range(1,2):
     print('Initializing Clustering...')
     
     
-    hc = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='complete').fit(features)
+    hc = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward').fit(features)
     
     cluster_centers = np.array( [features[hc.labels_ == c].mean(axis=0) for c in range(n_clusters)])
     
