@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Mon May 17 19:01:31 2021
 
-@author: fabioacl
+@author: juliana
 """
 
 from tensorflow.keras.layers import *
