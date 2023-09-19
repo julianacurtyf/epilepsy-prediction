@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Nov  9 13:52:03 2022
 
@@ -10,7 +8,7 @@ Created on Wed Nov  9 13:52:03 2022
 
 import os
 import glob
-from utils import *
+from utils import create_new_folder, create_file, get_cluster_interval, dunn_fast, cluster_kmeans, cluster_agglomerative, cluster_hdbscan
 import pandas as pd
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "9"
@@ -75,21 +73,3 @@ for path in folders_list:
     
 
 file.close()
-# %% Plotting
-
-# plot_3d(reduced_df, 'AE')
-
-# patient_id = 8902
-
-# create_figure_umap_reduction_plotly(str(seizure_number), patient_id, reduced_df, train_pred, datetime[seizure_number])
-
-# %% Saving
-
-# save_dim_reduction(reduced_df, datetime[seizure_number], train_pred, str(seizure_number),patient_id)
-
-# folder_name = 'AE models'
-
-# create_new_folder(folder_name)
-
-# deepClusteringAutoencoder.save(os.path.join(os.getcwd(), folder_name, 'pat_' + str(patient_id) +'_seizure_' + str(seizure_number)))
-

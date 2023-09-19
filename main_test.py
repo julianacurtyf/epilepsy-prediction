@@ -11,7 +11,7 @@ Created on Wed Nov  9 13:52:03 2022
 import os
 import numpy as np
 from keras.models import load_model
-from utils import *
+from utils import get_sorted_folders, get_files, get_patient_and_seizure_id, preprocessing, create_new_folder, create_file, get_cluster_interval, dunn_fast, create_figure_umap_reduction_plotly, save_dim_reduction, get_time_from_idx
 from tensorflow.keras.models import Model
 import pandas as pd
 
@@ -20,7 +20,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "9"
 
 # %% Import data - EPILEPSIAE
 
-path_to_raw_data = '/mnt/6a3bf9e0-7462-43d9-b6ae-3aa1a8be2f6a/fabioacl/Fabio/Fabio_Task_3/Datasets/'
+path_to_raw_data = '/path_to_data/Datasets/'
 
 folders_list = get_sorted_folders(path_to_raw_data)
 
@@ -30,7 +30,7 @@ folder_name = 'AE models - 8902'
 
 create_new_folder(folder_name)
 
-filename = 'metrics_test8902.csv'
+filename = 'metrics_test.csv'
 header = ['patient','seizure', 'dunn_idx', 'density', 'begin', 'end']
 
 writer, file = create_file(os.path.join(os.getcwd(),folder_name), filename, header, file_type='csv')
@@ -61,9 +61,6 @@ for j in range(len(folders_list)):
         test_target = datetime[i]
         
         test_set = (test_set - mean_train_set)/std_train_set
-    
-        
-        # %% Testing
         
         seizure_number = i
         
@@ -98,21 +95,3 @@ for j in range(len(folders_list)):
         
 
 file.close()
-# %% Plotting
-
-# plot_3d(reduced_df, 'AE')
-
-# patient_id = 8902
-
-# create_figure_umap_reduction_plotly(str(seizure_number), patient_id, reduced_df, train_pred, datetime[seizure_number])
-
-# %% Saving
-
-# save_dim_reduction(reduced_df, datetime[seizure_number], train_pred, str(seizure_number),patient_id)
-
-# folder_name = 'AE models'
-
-# create_new_folder(folder_name)
-
-# deepClusteringAutoencoder.save(os.path.join(os.getcwd(), folder_name, 'pat_' + str(patient_id) +'_seizure_' + str(seizure_number)))
-

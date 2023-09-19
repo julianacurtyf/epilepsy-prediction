@@ -13,7 +13,7 @@ import os
 import numpy as np
 from keras.activations import *
 from keras.optimizers import Adam
-from utils import *
+from utils import get_sorted_folders, get_files, get_patient_and_seizure_id, preprocessing, create_new_folder, create_file, get_cluster_interval, dunn_fast, target_distribution, get_time_from_idx
 from DeepClusteringLayer import ClusteringLayer
 from tensorflow.keras.models import Model
 from sklearn.model_selection import ParameterGrid
@@ -26,7 +26,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 
 # %% Import data - EPILEPSIAE
 
-path_to_raw_data = '/mnt/6a3bf9e0-7462-43d9-b6ae-3aa1a8be2f6a/fabioacl/Fabio/Fabio_Task_3/Datasets/'
+path_to_raw_data = '/path_to_data/Datasets/'
 
 folders_list = get_sorted_folders(path_to_raw_data)
 
@@ -34,7 +34,7 @@ folder_name = 'Grid Search files'
     
 create_new_folder(folder_name)
 
-for j in range(40,41):#len(folders_list)):
+for j in range(len(folders_list)):
     
     seizure_information, data, datetimes = get_files(folders_list[j], 'raw')
     
@@ -152,7 +152,7 @@ for j in range(40,41):#len(folders_list)):
             print('Training Deep Clustering Network...')
             
             batch_size = 64
-            epochs = 100  # 2000
+            epochs = 2000
             evaluate_interval = 10
             clean_interval = 5
             train_samples = len(train_set)
@@ -207,8 +207,6 @@ for j in range(40,41):#len(folders_list)):
             # %% Testing
             
             seizure_number = idx[2]
-            
-            # seizure_onset = timestamp_to_datetime(float(seizure_information[seizure_number][0]))
             
             test_set = data[seizure_number]
             

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Nov  9 13:52:03 2022
 
@@ -13,7 +11,8 @@ import os
 import numpy as np
 from keras.activations import *
 from keras.optimizers import Adam
-from utils import *
+import pandas as pd
+from utils import get_sorted_folders, get_files, get_patient_and_seizure_id, preprocessing, create_new_folder, create_file, get_cluster_interval, dunn_fast, target_distribution, get_time_from_idx
 from DeepClusteringLayer import ClusteringLayer
 from tensorflow.keras.models import Model
 from sklearn.model_selection import ParameterGrid
@@ -26,7 +25,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "9"
 
 # %% Import data - EPILEPSIAE
 
-path_to_raw_data = '/mnt/6a3bf9e0-7462-43d9-b6ae-3aa1a8be2f6a/fabioacl/Fabio/Fabio_Task_3/Datasets/'
+path_to_raw_data = '/path_to_data/Datasets/'
 
 folders_list = get_sorted_folders(path_to_raw_data)
 
@@ -42,7 +41,7 @@ header = ['idx','parameters', 'dunn_idx', 'density', 'begin', 'end']
 writer, file = create_file(os.path.join(os.getcwd(),folder_name), filename, header, file_type='csv')
 
 
-for j in range(1,2):
+for j in range(len(folders_list)):
     
     seizure_information, data, datetimes = get_files(folders_list[j], 'raw')
     
@@ -51,7 +50,9 @@ for j in range(1,2):
     data, datetime = preprocessing(data, datetimes)
     
     numberSeizures = len(data)
-    
+
+    assert(patient_id == eval(gridsearch_csv[0][j]))
+
     parameters = eval(gridsearch_csv[2][j])
     idx = eval(gridsearch_csv[1][j])
     
@@ -128,7 +129,6 @@ for j in range(1,2):
     
     print('Initializing Clustering...')
     
-    
     hc = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward').fit(features)
     
     cluster_centers = np.array( [features[hc.labels_ == c].mean(axis=0) for c in range(n_clusters)])
@@ -199,56 +199,33 @@ for j in range(1,2):
             break
     
     
-    # %% Testing
+    # %% Validation 
     
     seizure_number = idx[2]
-
-    test_set = validation_set 
     
-    test_reconstruction, test_pred = deepClusteringAutoencoder.predict(test_set)
-    test_pred = np.argmax(test_pred, axis=1)
+    val_reconstruction, val_pred = deepClusteringAutoencoder.predict(validation_set)
+    val_pred = np.argmax(val_pred, axis=1)
     
     latent = deepClusteringAutoencoder.get_layer('latent').output
     
     latentModel = Model(deepClusteringAutoencoder.input, latent)
     
-    reduced_df = encoder.predict(test_set)
+    reduced_df = encoder.predict(validation_set)
     
     preictal_begin_idx, preictal_end_idx, preictal_density = get_cluster_interval(train_pred, 6)
     
     preictal_begin, preictal_end = get_time_from_idx(datetime[seizure_number], preictal_begin_idx, preictal_end_idx)
     
-    dunn_index = dunn_fast(reduced_df, test_pred)
+    dunn_index = dunn_fast(reduced_df, val_pred)
     
-    # writer.writerow([idx, parameters, dunn_index, preictal_density, preictal_begin_idx, preictal_end_idx])
+    writer.writerow([idx, parameters, dunn_index, preictal_density, preictal_begin_idx, preictal_end_idx])
 
-    # # %% Plotting
-    
-    # create_figure_umap_reduction_plotly(str(seizure_number), patient_id, reduced_df, test_pred, target_val)
-    
-    # ## %% Saving
-    
-    # save_dim_reduction(reduced_df, target_val, test_pred, str(seizure_number),patient_id)
-    
-    # deepClusteringAutoencoder.save(os.path.join(os.getcwd(), folder_name, 'pat_' + str(patient_id)))
-    
+    # %% Saving 
+
+    folder_name = 'AE models'
+
+    create_new_folder(folder_name)
+
+    deepClusteringAutoencoder.save(os.path.join(os.getcwd(), folder_name, 'pat_' + str(patient_id) +'_seizure_' + str(seizure_number)))
 
 file.close()
-# %% Plotting
-
-# plot_3d(reduced_df, 'AE')
-
-# patient_id = 8902
-
-# create_figure_umap_reduction_plotly(str(seizure_number), patient_id, reduced_df, train_pred, datetime[seizure_number])
-
-# %% Saving
-
-# save_dim_reduction(reduced_df, datetime[seizure_number], train_pred, str(seizure_number),patient_id)
-
-# folder_name = 'AE models'
-
-# create_new_folder(folder_name)
-
-# deepClusteringAutoencoder.save(os.path.join(os.getcwd(), folder_name, 'pat_' + str(patient_id) +'_seizure_' + str(seizure_number)))
-
